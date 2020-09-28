@@ -3,6 +3,7 @@ from dateutil.relativedelta import relativedelta
 import pandas_datareader as pdr
 from datetime import datetime
 from config import Config
+from io import StringIO
 import pandas as pd
 import requests
 import time
@@ -176,6 +177,7 @@ def scrawl_date_info(Date, SID: int, isPrint=False):
     return data_df
 
 
+# 爬取個股市 某日之行情訊息
 def scrawler_date_infos(Date, SID: int, isPrint=False):
     count = 0
     while True:
@@ -191,8 +193,26 @@ def scrawler_date_infos(Date, SID: int, isPrint=False):
             return pd.DataFrame()
 
 
+# 爬取個股市公司之資訊
+def scrawl_stock_company_info(isPrint=False):
+    url = "http://mopsfin.twse.com.tw/opendata/t187ap03_L.csv"
+    try:
+        req = requests.get(url=url, headers=Config.HEADERS, timeout=10)
+        req.encoding = 'UTF-8'
+        time.sleep(round(uniform(3, 6), 1))
+    except Exception as e:
+        print("Error:", e)
+        return None
+    data = StringIO(req.text)
+    df = pd.read_csv(data)
+    if isPrint:
+        print(df)
+    return df
+
+
 if __name__ == "__main__":
     date = datetime.strptime("2010-06", "%Y-%m")
     sid = 3686
-    scrawl_date_info(Date=date, SID=sid, isPrint=True)
+    # scrawl_date_info(Date=date, SID=sid, isPrint=True)
     # scrawl_stock_BWIBBU(Date=date, SID=sid, isPrint=True)
+    scrawl_stock_company_info()
